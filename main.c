@@ -109,7 +109,7 @@ int pitches[] = {
 };
 
 int pitch = 3;
-int octave = 6;
+int octave = 5;
 
 int decideStartVolume() {
 	// if decay and attack are both at zero, start volume is sustain.level
@@ -264,265 +264,29 @@ int main(void) {
 			PianoKeys up;
 			up.VAL = pianoKeysUp();
 
-			/*
-			if (down.c)
-				sid.c = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave)],
-					127, 
-					64
-				);
-			if (up.c)
-				soundKill(sid.c);
-			*/
-
-			if (down.c)
-				sounds[0].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave)],
-					startVolume,
-					64
-				);
-			if (held.c) {
-				soundSetVolume(
-					sounds[0].sid,
-					attackDecaySustain(sounds[0].time)
-				);
-				sounds[0].time++;
-			}
-			if (up.c) {
-				sounds[0].time = 0;
-				soundKill(sounds[0].sid);
+			int bitfieldShift;
+			for (int i = 0; i < 13; i++) {
+				bitfieldShift = i + ((i >= 11) ? 2 : 0); // because of the gap in the PianoKeys bitfield ¯\_(ツ)_/¯
+				if (down.VAL & 1<<bitfieldShift)
+					sounds[i].sid = soundPlayPSG(
+						DutyCycle_25,
+						pitches[pitch + (12 * octave) + i],
+						startVolume,
+						64
+					);
+				if (held.VAL & 1<<bitfieldShift) {
+					soundSetVolume(
+						sounds[i].sid,
+						attackDecaySustain(sounds[i].time)
+					);
+					sounds[i].time++;
+				}
+				if (up.VAL & 1<<bitfieldShift) {
+					sounds[i].time = 0;
+					soundKill(sounds[i].sid);
+				}
 			}
 
-			// C# adsr
-			if (down.c_sharp)
-				sounds[1].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 1],
-					startVolume,
-					64
-				);
-			if (held.c_sharp) {
-				soundSetVolume(
-					sounds[1].sid,
-					attackDecaySustain(sounds[1].time)
-				);
-				sounds[1].time++;
-			}
-			if (up.c_sharp) {
-				sounds[1].time = 0;
-				soundKill(sounds[1].sid);
-			}
-
-			if (down.d)
-				sounds[2].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 2],
-					startVolume,
-					64
-				);
-			if (held.d) {
-				soundSetVolume(
-					sounds[2].sid,
-					attackDecaySustain(sounds[2].time)
-				);
-				sounds[2].time++;
-			}
-			if (up.d) {
-				sounds[2].time = 0;
-				soundKill(sounds[2].sid);
-			}
-
-			if (down.d_sharp)
-				sounds[3].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 3],
-					startVolume,
-					64
-				);
-			if (held.d_sharp) {
-				soundSetVolume(
-					sounds[3].sid,
-					attackDecaySustain(sounds[3].time)
-				);
-				sounds[3].time++;
-			}
-			if (up.d_sharp) {
-				sounds[3].time = 0;
-				soundKill(sounds[3].sid);
-			}
-
-			if (down.e)
-				sounds[4].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 4],
-					startVolume,
-					64
-				);
-			if (held.e) {
-				soundSetVolume(
-					sounds[4].sid,
-					attackDecaySustain(sounds[4].time)
-				);
-				sounds[4].time++;
-			}
-			if (up.e) {
-				sounds[4].time = 0;
-				soundKill(sounds[4].sid);
-			}
-
-			if (down.f)
-				sounds[5].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 5],
-					startVolume,
-					64
-				);
-			if (held.f) {
-				soundSetVolume(
-					sounds[5].sid,
-					attackDecaySustain(sounds[5].time)
-				);
-				sounds[5].time++;
-			}
-			if (up.f) {
-				sounds[5].time = 0;
-				soundKill(sounds[5].sid);
-			}
-
-			if (down.f_sharp)
-				sounds[6].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 6],
-					startVolume,
-					64
-				);
-			if (held.f_sharp) {
-				soundSetVolume(
-					sounds[6].sid,
-					attackDecaySustain(sounds[6].time)
-				);
-				sounds[6].time++;
-			}
-			if (up.f_sharp) {
-				sounds[6].time = 0;
-				soundKill(sounds[6].sid);
-			}
-
-			if (down.g)
-				sounds[7].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 7],
-					startVolume,
-					64
-				);
-			if (held.g) {
-				soundSetVolume(
-					sounds[7].sid,
-					attackDecaySustain(sounds[7].time)
-				);
-				sounds[7].time++;
-			}
-			if (up.g) {
-				sounds[7].time = 0;
-				soundKill(sounds[7].sid);
-			}
-
-			if (down.g_sharp)
-				sounds[8].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 8],
-					startVolume,
-					64
-				);
-			if (held.g_sharp) {
-				soundSetVolume(
-					sounds[8].sid,
-					attackDecaySustain(sounds[8].time)
-				);
-				sounds[8].time++;
-			}
-			if (up.g_sharp) {
-				sounds[8].time = 0;
-				soundKill(sounds[8].sid);
-			}
-
-			if (down.a)
-				sounds[9].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 9],
-					startVolume,
-					64
-				);
-			if (held.a) {
-				soundSetVolume(
-					sounds[9].sid,
-					attackDecaySustain(sounds[9].time)
-				);
-				sounds[9].time++;
-			}
-			if (up.a) {
-				sounds[9].time = 0;
-				soundKill(sounds[9].sid);
-			}
-
-			if (down.a_sharp)
-				sounds[10].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 10],
-					startVolume,
-					64
-				);
-			if (held.a_sharp) {
-				soundSetVolume(
-					sounds[10].sid,
-					attackDecaySustain(sounds[10].time)
-				);
-				sounds[10].time++;
-			}
-			if (up.a_sharp) {
-				sounds[10].time = 0;
-				soundKill(sounds[10].sid);
-			}
-
-			if (down.b)
-				sounds[11].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 11],
-					startVolume,
-					64
-				);
-			if (held.b) {
-				soundSetVolume(
-					sounds[11].sid,
-					attackDecaySustain(sounds[11].time)
-				);
-				sounds[11].time++;
-			}
-			if (up.b) {
-				sounds[11].time = 0;
-				soundKill(sounds[11].sid);
-			}
-
-			if (down.high_c)
-				sounds[12].sid = soundPlayPSG(
-					DutyCycle_25,
-					pitches[pitch + (12 * octave) + 12],
-					startVolume,
-					64
-				);
-			if (held.high_c) {
-				soundSetVolume(
-					sounds[12].sid,
-					attackDecaySustain(sounds[12].time)
-				);
-				sounds[12].time++;
-			}
-			if (up.high_c) {
-				sounds[12].time = 0;
-				soundKill(sounds[12].sid);
-			}
 		}
 
 	}
